@@ -62,7 +62,7 @@ def search():
 @cli.command()
 @click.option('--sort', prompt='Field to sort with', default='name')
 def list(sort):
-    x = [x.name for x in Game.__attrs_attrs__]
+    fields = [x.name for x in Game.__attrs_attrs__]
     if os.path.exists(FILENAME):
         with open(FILENAME, 'r') as f:
             inventory = yaml.load(f)
