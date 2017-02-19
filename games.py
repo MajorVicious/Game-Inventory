@@ -2,6 +2,7 @@ import click
 import attr
 import yaml
 import os
+import prettytable
 
 FILENAME = 'inventory.yml'
 
@@ -15,7 +16,12 @@ class Game(object):
     duration = attr.ib()
 
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 @click.option('--name', prompt='Game name')
 @click.option(
     '--min-player', type=int, prompt='Min. number of players', default=2)
@@ -53,9 +59,21 @@ def search():
     pass
 
 
-def list():
-    pass
+@cli.command()
+@click.option('--sort', prompt='Field to sort with', default='name')
+def list(sort):
+    x = [x.name for x in Game.__attrs_attrs__]
+    if os.path.exists(FILENAME):
+        with open(FILENAME, 'r') as f:
+            inventory = yaml.load(f)
+        table = prettytable.PrettyTable()
+        table.field_names = fields
+        for game in inventory:
+            table.add_row([game[field] for field in fields])
+        print(table)
+    else:
+        print('no inventory file found')
 
 
 if __name__ == '__main__':
-    add()
+    cli()
