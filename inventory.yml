@@ -1,0 +1,5 @@
+- {duration: 60, genre: Boardgame, max_player: 3, min_player: 2, name: Chess}
+- {duration: 120, genre: Strategy, max_player: 6, min_player: 2, name: 7 wonders}
+- {duration: 60, genre: Strategy, max_player: 5, min_player: 2, name: Splendor}
+- {duration: 60, genre: Strategy, max_player: 6, min_player: 2, name: Abyss}
+- {duration: 15, genre: Humor, max_player: 6, min_player: 2, name: Taggle}
