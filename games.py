@@ -66,6 +66,8 @@ def list(sort):
     if os.path.exists(FILENAME):
         with open(FILENAME, 'r') as f:
             inventory = yaml.load(f)
+        
+        inventory.sort(key=lambda x: x[sort])
         table = prettytable.PrettyTable()
         table.field_names = fields
         for game in inventory:
