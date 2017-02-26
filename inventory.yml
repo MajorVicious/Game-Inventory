@@ -4,3 +4,4 @@
 - {duration: 60, genre: Strategy, max_player: 6, min_player: 2, name: Abyss}
 - {duration: 15, genre: Humor, max_player: 6, min_player: 2, name: Taggle}
 - {duration: 20, genre: Cards, max_player: 5, min_player: 2, name: Uno}
+- {duration: 60, genre: Cards, max_player: 8, min_player: 3, name: Dixit}

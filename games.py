@@ -3,6 +3,7 @@ import attr
 import yaml
 import os
 import prettytable
+import random
 
 FILENAME = 'inventory.yml'
 
@@ -54,27 +55,57 @@ def add(*args, **kwargs):
     else:
         print('{} added'.format(g.name))
 
+@cli.command()
+@click.option('--player', prompt="How many players ?", default=2)
+@click.option('--time', prompt="How many time have you ?", default=60)
+def search(player, time):
+    candidates = []
+    inventory = load()
 
-def search():
-    pass
+    for game in inventory:
+        if game["min_player"] <= player <= game["max_player"] and game["duration"] <= time:
+            candidates.append(game)
+
+
+    if candidates:
+        results = []
+        while sum(item["duration"] for item in results) < time:
+            choice = random.choice(candidates)
+            if sum(item["duration"] for item in results) + choice["duration"] > time:
+                break
+
+            results.append(choice)
+            candidates.remove(choice)
+
+        show(results)
+
+
+    else:
+        print("There is no game to choose from.")
+
+def load():
+    if os.path.exists(FILENAME):
+        with open(FILENAME, 'r') as f:
+            inventory = yaml.load(f)
+            return inventory
+    else:
+        raise Exception("No inventory file found")
+
+def show(inventory):
+    fields = [x.name for x in Game.__attrs_attrs__]
+    table = prettytable.PrettyTable()
+    table.field_names = fields
+    for game in inventory:
+        table.add_row([game[field] for field in fields])
+    print(table)
 
 
 @cli.command()
 @click.option('--sort', prompt='Field to sort with', default='name')
 def list(sort):
-    fields = [x.name for x in Game.__attrs_attrs__]
-    if os.path.exists(FILENAME):
-        with open(FILENAME, 'r') as f:
-            inventory = yaml.load(f)
-        
-        inventory.sort(key=lambda x: x[sort])
-        table = prettytable.PrettyTable()
-        table.field_names = fields
-        for game in inventory:
-            table.add_row([game[field] for field in fields])
-        print(table)
-    else:
-        print('no inventory file found')
+    inventory = load()
+    inventory.sort(key=lambda x: x[sort])
+    show(inventory)
 
 
 if __name__ == '__main__':
