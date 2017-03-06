@@ -32,28 +32,7 @@ def cli():
 @click.option('--duration', type=int, prompt='Game duration (min)', default=5)
 def add(*args, **kwargs):
     g = Game(*args, **kwargs)
-    if os.path.exists(FILENAME):
-        with open(FILENAME, 'r') as f:
-            inventory = yaml.load(f)
-    else:
-        inventory = []
-
-    updated = False
-    for existing in inventory:
-        if existing['name'] == g.name:
-            updated = True
-            existing.update(g.__dict__)
-
-    if not updated:
-        inventory.append(g.__dict__)
-
-    with open(FILENAME, 'w') as f:
-        yaml.dump(inventory, f)
-
-    if updated:
-        print('{} updated'.format(g.name))
-    else:
-        print('{} added'.format(g.name))
+    liste(g)
 
 @cli.command()
 @click.option('--player', prompt="How many players ?", default=2)
@@ -63,7 +42,8 @@ def search(player, time):
     inventory = load()
 
     for game in inventory:
-        if game["min_player"] <= player <= game["max_player"] and game["duration"] <= time:
+        if game["min_player"] <= player <= game["max_player"] \
+                                and game["duration"] <= time:
             candidates.append(game)
 
 
@@ -106,6 +86,51 @@ def list(sort):
     inventory = load()
     inventory.sort(key=lambda x: x[sort])
     show(inventory)
+
+def liste(g):
+    list_to_use = input("Do you want to use the default list ? Y/N \
+    default = {} ".format(useProprieties()))
+    if list_to_use.lower() == 'y':
+        FILENAME = str(useProprieties())
+    else:
+        FILENAME = input("Enter the name of your game list, with the extension '.yml'")
+        
+    savedefault(FILENAME)
+
+    if os.path.exists(FILENAME):
+        with open(FILENAME, 'r') as f:
+            inventory = yaml.load(f)
+    else:
+        inventory = []
+
+    updated = False
+    for existing in inventory:
+        if existing['name'] == g.name:
+            updated = True
+            existing.update(g.__dict__)
+
+    if not updated:
+        inventory.append(g.__dict__)
+
+    with open(FILENAME, 'w') as f:
+        yaml.dump(inventory, f)
+
+    if updated:
+        print('{} updated'.format(g.name))
+    else:
+        print('{} added'.format(g.name))
+
+#Configuration file
+
+def useProprieties():
+    with open('proprieties.txt', 'r') as p:
+        config = yaml.load(p)
+        FILENAME = config.split('=',1)[1].strip()
+    return FILENAME
+
+def savedefault(FILENAME):
+    with open('proprieties.txt', 'w') as p:
+        yaml.dump('DEFAULT LIST = {}'.format(FILENAME), p)
 
 
 if __name__ == '__main__':
