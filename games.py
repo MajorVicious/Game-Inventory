@@ -92,8 +92,10 @@ def liste(g):
     default = {} ".format(useProprieties()))
     if list_to_use.lower() == 'y':
         FILENAME = str(useProprieties())
-    else:
+    elif list_to_use.lower() == 'n':
         FILENAME = input("Enter the name of your game list, with the extension '.yml'")
+    else:
+        print("Type 'Y' or 'N'.")
         
     savedefault(FILENAME)
 
