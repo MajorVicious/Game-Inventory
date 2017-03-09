@@ -32,7 +32,7 @@ def cli():
 @click.option('--duration', type=int, prompt='Game duration (min)', default=5)
 def add(*args, **kwargs):
     g = Game(*args, **kwargs)
-    liste(g)
+    save(g)
 
 @cli.command()
 @click.option('--player', prompt="How many players ?", default=2)
@@ -87,16 +87,11 @@ def list(sort):
     inventory.sort(key=lambda x: x[sort])
     show(inventory)
 
-def liste(g):
+def save(g):
     list_to_use = input("Do you want to use the default list ? Y/N \
     default = {} ".format(useProprieties()))
-    if list_to_use.lower() == 'y':
-        FILENAME = str(useProprieties())
-    elif list_to_use.lower() == 'n':
-        FILENAME = input("Enter the name of your game list, with the extension '.yml'")
-    else:
-        print("Type 'Y' or 'N'.")
-        
+    check(list_to_use)
+
     savedefault(FILENAME)
 
     if os.path.exists(FILENAME):
@@ -133,6 +128,12 @@ def useProprieties():
 def savedefault(FILENAME):
     with open('proprieties.txt', 'w') as p:
         yaml.dump('DEFAULT LIST = {}'.format(FILENAME), p)
+
+def check(data):
+    if data.lower() == 'y' or data == '':
+        FILENAME = str(useProprieties())
+    elif data.lower() == 'n':
+        FILENAME = input("Enter the name of your game list, with the extension '.yml'")
 
 
 if __name__ == '__main__':
