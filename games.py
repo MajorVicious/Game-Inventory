@@ -4,8 +4,7 @@ import yaml
 import os
 import prettytable
 import random
-
-FILENAME = 'inventory.yml'
+import proprieties
 
 
 @attr.s
@@ -64,6 +63,7 @@ def search(player, time):
         print("There is no game to choose from.")
 
 def load():
+    FILENAME = useProprieties()
     if os.path.exists(FILENAME):
         with open(FILENAME, 'r') as f:
             inventory = yaml.load(f)
@@ -88,11 +88,7 @@ def list(sort):
     show(inventory)
 
 def save(g):
-    list_to_use = input("Do you want to use the default list ? Y/N \
-    default = {} ".format(useProprieties()))
-    check(list_to_use)
-
-    savedefault(FILENAME)
+    FILENAME = defineList()
 
     if os.path.exists(FILENAME):
         with open(FILENAME, 'r') as f:
@@ -117,23 +113,28 @@ def save(g):
     else:
         print('{} added'.format(g.name))
 
-#Configuration file
+@cli.command()
+@click.option('--data', prompt="Do you want to use the default list ?")
+def newList(data):
+    if data.lower() == 'y' or data == '':
+        FILENAME = str(defineList())
+    elif data.lower() == 'n':
+        FILENAME = input("Enter the name of your game list, with the extension '.yml'")
+        
 
-def useProprieties():
-    with open('proprieties.txt', 'r') as p:
-        config = yaml.load(p)
-        FILENAME = config.split('=',1)[1].strip()
-    return FILENAME
-
-def savedefault(FILENAME):
     with open('proprieties.txt', 'w') as p:
         yaml.dump('DEFAULT LIST = {}'.format(FILENAME), p)
 
-def check(data):
-    if data.lower() == 'y' or data == '':
-        FILENAME = str(useProprieties())
-    elif data.lower() == 'n':
-        FILENAME = input("Enter the name of your game list, with the extension '.yml'")
+#Configuration file
+
+def defineList():
+    with open('proprieties.txt', 'r') as p:
+        config = yaml.load(p)
+        lecture = config.split()
+        if "LIST" in lecture:
+            FILENAME = config.split('=',1)[1].strip()
+    return FILENAME
+
 
 
 if __name__ == '__main__':

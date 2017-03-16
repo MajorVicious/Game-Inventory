@@ -1,2 +1,2 @@
-DEFAULT LIST = inventory.yml
+DEFAULT LIST = Test.yml
 ...
