@@ -4,8 +4,14 @@ import yaml
 import os
 import prettytable
 import random
-import datetime
+import datetime as dt
 
+
+DATE_FORMAT = '%d-%m-%Y'
+
+GAME_DIFFICULTY = {1 : "Novice",
+                   2 : "Intermediate",
+                   3 : "Expert"}
 
 
 @attr.s
@@ -35,8 +41,8 @@ def cli():
 @click.option('--genre', prompt='Game genre')
 @click.option('--duration', type=int, prompt='Game duration (min)', default=5)
 @click.option(
-    '--level', type=str, prompt='Difficulty(Novice, Intermediate, Expert)', 
-    default='Intermediate')
+    '--level', type=int, prompt=("Difficulty({}),").format(",".join(map(str, GAME_DIFFICULTY.keys()))),
+    default=2)
 def add(*args, **kwargs):
     g = Game(*args, **kwargs)
     save(g)
@@ -47,13 +53,10 @@ def add(*args, **kwargs):
 def search(player, time):
     candidates = []
     inventory = load()
-    
-
     for game in inventory:
         if (game["min_player"] <= player <= game["max_player"]
-                                and game["duration"] <= time):
+                and game["duration"] <= time):
             candidates.append(game)
-
 
     if candidates:
         results = []
@@ -66,7 +69,6 @@ def search(player, time):
             candidates.remove(choice)
 
         show(results)
-        played(results)
 
 
     else:
@@ -86,7 +88,14 @@ def show(inventory):
     table = prettytable.PrettyTable()
     table.field_names = fields
     for game in inventory:
-        table.add_row([game[field] for field in fields])
+        temp = []
+        for field in fields:
+            if field == "level":
+                temp.append(GAME_DIFFICULTY[game[field]])
+            else:
+                temp.append(game[field])
+
+        table.add_row(temp)
     print(table)
 
 
@@ -123,21 +132,39 @@ def save(game):
     else:
         print('{} added'.format(game.name))
 
+#Rating and Timestamp
+
+@cli.command()
+@click.option('--name', prompt="Choose a game for the timestamp")
+def time_stamp(name):
+    inventory = load()
+    for game in inventory:
+        if game["name"] == name:
+            game["last_played"] = dt.date.strftime(dt.date.today(), DATE_FORMAT)
+            update(game)
+
+@cli.command()
+@click.option('--name', prompt='Choose a game to rate')
+@click.option('--rate', prompt="Rate the game")
+def rate(name, rate):
+    inventory = load()
+    for game in inventory:
+        if game['name'] == name:
+            game["stars"] = rate
+            update(game)
+
 def update(game):
+    inventory = load()
     filename = define_list()
-
-    with open(filename, 'r') as f:
-        inventory = yaml.load(f)
-
-    for existing in inventory:
-        if existing["name"] == game["name"]:
-            existing["last_played"] = game["last_played"]
-            existing["stars"] = game["stars"]
-
+    for game_to_update in inventory:
+        if game_to_update["name"] == game["name"]:
+            game_to_update["last_played"] = game["last_played"]
+            game_to_update["stars"] = game["stars"]
 
     with open(filename, 'w') as f:
         yaml.dump(inventory, f)
 
+#Configuration file
 
 @cli.command()
 @click.option('--data', prompt="Do you want to use the default list ?")
@@ -145,42 +172,17 @@ def newList(data):
     if data.lower() == 'y' or data == '':
         filename = define_list()
     elif data.lower() == 'n':
-        filename = input("Enter the name of your game list, with the extension '.yml'")
+        filename = input("Enter the name of your game list, with the extension '.yml' ")
 
 
     with open('properties.txt', 'w') as p:
-        save = {"Default list": filename}
-        yaml.dump(save, p)
-
-def played(results):
-    temp = []
-    for result in results:
-        play = input("Do you played the game ? ")
-        if play.lower() == "y":
-            temp.append(result)
-            for game in temp:
-                day = datetime.date.today()
-                game["last_played"] = datetime.date.strftime(day, '%d-%m-%Y')
-                star = starred(game)
-                update(star)
-        else:
-            pass
-
-def starred(game):
-    star = input("Do you want to rate the game ? ")
-    if star.lower() == "y":
-        rate = eval(input("How many star ? from 0 to 5 "))
-        game["stars"] = rate
-        return game
-    else:
-        pass
-
-#Configuration file
+        default_list = {"default_list": filename}
+        yaml.dump(default_list, p)
 
 def define_list():
     with open('properties.txt', 'r') as p:
         list_used = yaml.load(p)
-        filename = list_used["Default list"]
+        filename = list_used["default_list"]
     return filename
 
 
