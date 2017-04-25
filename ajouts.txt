@@ -1,2 +1,0 @@
-temps d'apprentissage des regles
-complexité

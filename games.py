@@ -185,22 +185,6 @@ def define_list():
         filename = list_used["default_list"]
     return filename
 
-@cli.command()
-def update_list():
-    filename = define_list()
-    inventory = load()
-    fields = [x.name for x in Game.__attrs_attrs__]
-    for game in inventory:
-        for field in fields:
-            if field not in game.keys():
-                if field == "level":
-                    game[field] = 2
-                else:
-                    game[field] = None
-
-    
-    with open(filename, 'w') as f:
-        yaml.dump(inventory, f)
 
 
 if __name__ == '__main__':
