@@ -1,0 +1,58 @@
+- {duration: 35, genre: Cards, last_played: null, level: 2, max_player: 4, min_player: 2,
+  name: Chtulu Realms, stars: null}
+- {duration: 20, genre: Cards, last_played: null, level: 2, max_player: 5, min_player: 1,
+  name: The Game, stars: null}
+- {duration: 30, genre: Board Game, last_played: null, level: 2, max_player: 4, min_player: 2,
+  name: Splendor, stars: null}
+- {duration: 15, genre: Dice, last_played: null, level: 2, max_player: 5, min_player: 2,
+  name: Strike, stars: null}
+- {duration: 45, genre: Cards, last_played: null, level: 2, max_player: 7, min_player: 2,
+  name: Le Bizness des Haricots, stars: null}
+- {duration: 60, genre: Strategy, last_played: null, level: 2, max_player: 5, min_player: 2,
+  name: Isle Of Skye, stars: null}
+- {duration: 45, genre: BoardGame, last_played: null, level: 2, max_player: 5, min_player: 2,
+  name: Tokaido, stars: null}
+- {duration: 45, genre: Strategy, last_played: null, level: 2, max_player: 4, min_player: 2,
+  name: Abyss, stars: null}
+- {duration: 30, genre: Cards, last_played: null, level: 2, max_player: 12, min_player: 2,
+  name: Saboteur, stars: null}
+- {duration: 45, genre: BoardGame, last_played: null, level: 2, max_player: 4, min_player: 2,
+  name: Meeple War, stars: null}
+- {duration: 45, genre: BoardGame, last_played: null, level: 2, max_player: 4, min_player: 2,
+  name: "Ek\xF6", stars: null}
+- {duration: 45, genre: Cooperation, last_played: null, level: 2, max_player: 4, min_player: 2,
+  name: Pandemie, stars: null}
+- {duration: 90, genre: BoardGame, last_played: null, level: 2, max_player: 6, min_player: 3,
+  name: City Of Horror, stars: null}
+- {duration: 30, genre: Construction, last_played: null, level: 2, max_player: 6,
+  min_player: 2, name: Bausack, stars: null}
+- {duration: 60, genre: Strategy, last_played: null, level: 2, max_player: 6,
+  min_player: 2, name: 7 Wonders, stars: null}
+- {duration: 30, genre: Dice, last_played: null, level: 2, max_player: 5, min_player: 2,
+  name: Las Vegas, stars: null}
+- {duration: 20, genre: Cards, last_played: null, level: 2, max_player: 2, min_player: 2,
+  name: Dragon Heart, stars: null}
+- {duration: 30, genre: Dice, last_played: null, level: 2, max_player: 5, min_player: 2,
+  name: Mille Sabords, stars: null}
+- {duration: 30, genre: Duel, last_played: null, level: 2, max_player: 2, min_player: 2,
+  name: Jaipur, stars: null}
+- {duration: 30, genre: Cards, last_played: null, level: 2, max_player: 12, min_player: 3,
+  name: Dixit, stars: null}
+- {duration: 50, genre: Story Telling, last_played: null, level: 2, max_player: 4,
+  min_player: 2, name: Visiteur du Futur, stars: null}
+- {duration: 30, genre: Dice, last_played: null, level: 2, max_player: 4, min_player: 1,
+  name: Dungeon Roll, stars: null}
+- {duration: 30, genre: Cooperation, last_played: null, level: 2, max_player: 6, min_player: 1,
+  name: Room-25, stars: null}
+- {duration: 20, genre: Strategy, last_played: null, level: 2, max_player: 6, min_player: 2,
+  name: Wazabi, stars: null}
+- {duration: 15, genre: Dice, last_played: null, level: 2, max_player: 6, min_player: 2,
+  name: King's Gold, stars: null}
+- {duration: 15, genre: Cards, last_played: null, level: 2, max_player: 8, min_player: 2,
+  name: Timeline, stars: null}
+- {duration: 30, genre: Cards, last_played: null, level: 2, max_player: 5, min_player: 2,
+  name: Lords of Scotland, stars: null}
+- {duration: 30, genre: Dice, last_played: null, level: 2, max_player: 4, min_player: 2,
+  name: Mini Ville, stars: null}
+- {duration: 60, genre: Dice, last_played: null, level: 2, max_player: 4, min_player: 3,
+  name: Black Fleet, stars: null}
