@@ -1,1 +1,1 @@
-{default_list: Liste Nou.yml}
+{default_list: inventory.yml}
