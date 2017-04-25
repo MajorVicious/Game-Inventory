@@ -14,6 +14,7 @@ GAME_DIFFICULTY = {1 : "Novice",
                    3 : "Expert"}
 
 
+
 @attr.s
 class Game(object):
     name = attr.ib()
