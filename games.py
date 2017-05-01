@@ -41,9 +41,8 @@ def cli():
     '--max-player', type=int, prompt='Max. number of players', default=4)
 @click.option('--genre', prompt='Game genre')
 @click.option('--duration', type=int, prompt='Game duration (min)', default=5)
-@click.option(
-    '--level', type=int, prompt=("Difficulty({}),").format(",".join(map(str, GAME_DIFFICULTY.keys()))),
-    default=2)
+@click.option('--level', type=int, prompt=("Difficulty({}),").format
+            (",".join(map(str, GAME_DIFFICULTY.keys()))), default=2)
 def add(*args, **kwargs):
     g = Game(*args, **kwargs)
     save(g)
@@ -51,10 +50,13 @@ def add(*args, **kwargs):
 @cli.command()
 @click.option('--player', prompt="How many players ?", default=2)
 @click.option('--time', prompt="How many time have you ?", default=60)
-def search(player, time):
+@click.option('--skill', prompt="What is the mean of players skills ? {}".format
+              (','.join(map(str, GAME_DIFFICULTY.keys()))), default=2)
+def search(player, time, skill):
     candidates = []
     inventory = load()
     for game in inventory:
+        rules(game, skill)
         if (game["min_player"] <= player <= game["max_player"]
                 and game["duration"] <= time):
             candidates.append(game)
@@ -98,6 +100,17 @@ def show(inventory):
 
         table.add_row(temp)
     print(table)
+
+def rules(game, skill):
+    rule = game["level"] - skill
+    if rule == -2:
+        game['duration'] -= 5
+    elif rule == 0:
+        game["duration"] += 5
+    elif rule == 1:
+        game['duration'] += 10
+    elif rule == 2:
+        game['duration'] += 15
 
 
 @cli.command()
@@ -173,11 +186,11 @@ def newList(data):
     if data.lower() == 'y' or data == '':
         filename = define_list()
     elif data.lower() == 'n':
-        filename = input("Enter the name of your game list, with the extension '.yml' ")
+        filename = input("Enter the name of your game list ")
 
 
     with open('properties.txt', 'w') as p:
-        default_list = {"default_list": filename}
+        default_list = {"default_list": filename + ".yml"}
         yaml.dump(default_list, p)
 
 def define_list():
