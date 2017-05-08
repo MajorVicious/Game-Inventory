@@ -13,6 +13,8 @@ GAME_DIFFICULTY = {1 : "Novice",
                    2 : "Intermediate",
                    3 : "Expert"}
 
+DEFINED_ARTICLES = {"EN" : "The",
+                    "FR" : ["Le", "La", "Les"]}
 
 
 @attr.s
@@ -115,8 +117,14 @@ def rules(game, skill):
 
 @cli.command()
 @click.option('--sort', prompt='Field to sort with', default='name')
-def list(sort):
+@click.option(
+    '--formating', prompt='Do you want to format the names ? (removing defined articles) ',
+    default='y')
+def list(sort, formating):
     inventory = load()
+    if formating == "y":
+        name_format(inventory)
+
     inventory.sort(key=lambda x: x[sort])
     show(inventory)
 
@@ -145,6 +153,15 @@ def save(game):
         print('{} updated'.format(game.name))
     else:
         print('{} added'.format(game.name))
+
+def name_format(inventory):
+    article = " ".join(map(str, DEFINED_ARTICLES.values()))
+    for game in inventory:
+        name = game["name"].split(" ")
+        if name[0] in article:
+            temp = "(" + name.pop(0) + ")"
+            name.append(temp)
+            game["name"] = " ".join(map(str, name))
 
 #Rating and Timestamp
 
