@@ -67,11 +67,10 @@ def search(player, time, skill):
         results = []
         while sum(item["duration"] for item in results) < time and candidates:
             choice = random.choice(candidates)
-            if sum(item["duration"] for item in results) + choice["duration"] > time:
-                break
-
-            results.append(choice)
             candidates.remove(choice)
+            if sum(item["duration"] for item in results) + choice["duration"] > time:
+                continue
+            results.append(choice)
 
         show(results)
 
@@ -155,11 +154,15 @@ def save(game):
         print('{} added'.format(game.name))
 
 def name_format(inventory):
-    article = " ".join(map(str, DEFINED_ARTICLES.values()))
+    articles = set()
+
+    for da in DEFINED_ARTICLES.values():
+        articles.update(da)
+
     for game in inventory:
         name = game["name"].split(" ")
-        if name[0] in article:
-            temp = "(" + name.pop(0) + ")"
+        if name[0] in articles:
+            temp = "({})".format(name.pop(0))
             name.append(temp)
             game["name"] = " ".join(map(str, name))
 
