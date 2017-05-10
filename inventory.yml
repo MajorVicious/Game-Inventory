@@ -16,9 +16,3 @@
   name: Chtulu Realms, stars: null}
 - {duration: 20, genre: Cards, last_played: null, level: 2, max_player: 5, min_player: 1,
   name: The Game, stars: null}
-- {duration: 5, genre: essai, last_played: null, level: 2, max_player: 4, min_player: 2,
-  name: Test, stars: null}
-- {duration: 5, genre: Strat, last_played: null, level: 2, max_player: 4, min_player: 2,
-  name: Try, stars: null}
-- {duration: 5, genre: try, last_played: null, level: 2, max_player: 4, min_player: 2,
-  name: try, stars: null}
