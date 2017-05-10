@@ -6,15 +6,11 @@ import prettytable
 import random
 import datetime as dt
 
-
 DATE_FORMAT = '%d-%m-%Y'
 
-GAME_DIFFICULTY = {1 : "Novice",
-                   2 : "Intermediate",
-                   3 : "Expert"}
+GAME_DIFFICULTY = {1: "Novice", 2: "Intermediate", 3: "Expert"}
 
-DEFINED_ARTICLES = {"EN" : "The",
-                    "FR" : ["Le", "La", "Les"]}
+DEFINED_ARTICLES = {"EN": ["The"], "FR": ["Le", "La", "Les"]}
 
 
 @attr.s
@@ -27,7 +23,6 @@ class Game(object):
     level = attr.ib()
     last_played = attr.ib(default=None)
     stars = attr.ib(default=None)
-
 
 
 @click.group()
@@ -43,24 +38,32 @@ def cli():
     '--max-player', type=int, prompt='Max. number of players', default=4)
 @click.option('--genre', prompt='Game genre')
 @click.option('--duration', type=int, prompt='Game duration (min)', default=5)
-@click.option('--level', type=int, prompt=("Difficulty({}),").format
-            (",".join(map(str, GAME_DIFFICULTY.keys()))), default=2)
+@click.option(
+    '--level',
+    type=int,
+    prompt=(
+        "Difficulty({}),").format(",".join(map(str, GAME_DIFFICULTY.keys()))),
+    default=2)
 def add(*args, **kwargs):
     g = Game(*args, **kwargs)
     save(g)
 
+
 @cli.command()
 @click.option('--player', prompt="How many players ?", default=2)
 @click.option('--time', prompt="How many time have you ?", default=60)
-@click.option('--skill', prompt="What is the mean of players skills ? {}".format
-              (','.join(map(str, GAME_DIFFICULTY.keys()))), default=2)
+@click.option(
+    '--skill',
+    prompt="What is the mean of players skills ? {}".format(
+        ','.join(map(str, GAME_DIFFICULTY.keys()))),
+    default=2)
 def search(player, time, skill):
     candidates = []
     inventory = load()
     for game in inventory:
         rules(game, skill)
-        if (game["min_player"] <= player <= game["max_player"]
-                and game["duration"] <= time):
+        if (game["min_player"] <= player <= game["max_player"] and
+                game["duration"] <= time):
             candidates.append(game)
 
     if candidates:
@@ -68,15 +71,16 @@ def search(player, time, skill):
         while sum(item["duration"] for item in results) < time and candidates:
             choice = random.choice(candidates)
             candidates.remove(choice)
-            if sum(item["duration"] for item in results) + choice["duration"] > time:
+            if sum(item["duration"]
+                   for item in results) + choice["duration"] > time:
                 continue
             results.append(choice)
 
         show(results)
 
-
     else:
         print("There is no game to choose from.")
+
 
 def load():
     filename = define_list()
@@ -86,6 +90,7 @@ def load():
             return inventory
     else:
         raise Exception("No inventory file found")
+
 
 def show(inventory):
     fields = [x.name for x in Game.__attrs_attrs__]
@@ -102,6 +107,7 @@ def show(inventory):
         table.add_row(temp)
     print(table)
 
+
 def rules(game, skill):
     rule = game["level"] - skill
     if rule == -2:
@@ -117,7 +123,8 @@ def rules(game, skill):
 @cli.command()
 @click.option('--sort', prompt='Field to sort with', default='name')
 @click.option(
-    '--formating', prompt='Do you want to format the names ? (removing defined articles) ',
+    '--formating',
+    prompt='Do you want to format the names ? (removing defined articles) ',
     default='y')
 def list(sort, formating):
     inventory = load()
@@ -126,6 +133,7 @@ def list(sort, formating):
 
     inventory.sort(key=lambda x: x[sort])
     show(inventory)
+
 
 def save(game):
     filename = define_list()
@@ -153,20 +161,20 @@ def save(game):
     else:
         print('{} added'.format(game.name))
 
+
 def name_format(inventory):
     articles = set()
-
     for da in DEFINED_ARTICLES.values():
         articles.update(da)
 
     for game in inventory:
         name = game["name"].split(" ")
         if name[0] in articles:
-            temp = "({})".format(name.pop(0))
-            name.append(temp)
-            game["name"] = " ".join(map(str, name))
+            game["name"] = "{} ({})".format(' '.join(name[1:]), name[0])
+
 
 #Rating and Timestamp
+
 
 @cli.command()
 @click.option('--name', prompt="Choose a game for the timestamp")
@@ -174,8 +182,10 @@ def time_stamp(name):
     inventory = load()
     for game in inventory:
         if game["name"] == name:
-            game["last_played"] = dt.date.strftime(dt.date.today(), DATE_FORMAT)
+            game["last_played"] = dt.date.strftime(dt.date.today(),
+                                                   DATE_FORMAT)
             update(game)
+
 
 @cli.command()
 @click.option('--name', prompt='Choose a game to rate')
@@ -186,6 +196,7 @@ def rate(name, rate):
         if game['name'] == name:
             game["stars"] = rate
             update(game)
+
 
 def update(game):
     inventory = load()
@@ -198,7 +209,9 @@ def update(game):
     with open(filename, 'w') as f:
         yaml.dump(inventory, f)
 
+
 #Configuration file
+
 
 @cli.command()
 @click.option('--data', prompt="Do you want to use the default list ?")
@@ -208,16 +221,17 @@ def newList(data):
     elif data.lower() == 'n':
         filename = input("Enter the name of your game list ")
 
-
     with open('properties.txt', 'w') as p:
         default_list = {"default_list": filename + ".yml"}
         yaml.dump(default_list, p)
+
 
 def define_list():
     with open('properties.txt', 'r') as p:
         list_used = yaml.load(p)
         filename = list_used["default_list"]
     return filename
+
 
 @cli.command()
 def update_list():
@@ -232,7 +246,6 @@ def update_list():
                 else:
                     game[field] = None
 
-    
     with open(filename, 'w') as f:
         yaml.dump(inventory, f)
 
