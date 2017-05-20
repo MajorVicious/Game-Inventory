@@ -2,11 +2,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from sqlalchemy import create_engine
+from sqlalchemy import ForeignKey
 import datetime
 import yaml
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SECRET_KEY'] = 'CHANGEME'
@@ -14,8 +17,21 @@ db = SQLAlchemy(app)
 admin = Admin(app, name='games', template_mode='bootstrap3', url='/')
 
 
+user_library = db.Table('user_library', db.metadata,
+                    db.Column('library_id', db.Integer, db.ForeignKey("library.id")),
+                    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+)
+
+game_library = db.Table('game_library', db.metadata,
+                    db.Column('library_id', db.Integer, db.ForeignKey("library.id")),
+                    db.Column('game_id', db.Integer, db.ForeignKey('game.id'))
+)
+
 class ExportableModelView(ModelView):
     can_export = True
+
+class LibraryModelView(ModelView):
+    column_list = ('name', 'games', 'users')
 
 
 class Genre(db.Model):
@@ -53,6 +69,7 @@ class Stars(db.Model):
         return '*' * self.amount
 
 
+
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -73,6 +90,28 @@ class Game(db.Model):
     stars = db.relationship(Stars)
 
 
+    def __repr__(self):
+        return self.name
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    libraries = db.relationship('Library', secondary=user_library)
+
+    def __repr__(self):
+        return  self.name
+
+class Library(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80))
+    games = db.relationship('Game', secondary=game_library)
+    users = db.relationship('User', secondary=user_library)
+
+    def __repr__(self):
+        return self.name
+
+
+
 if __name__ == '__main__':
     db.create_all()
     session = db.session
@@ -83,7 +122,8 @@ if __name__ == '__main__':
         ])
         session.add_all([Stars(1), Stars(2), Stars(3)])
 
-        with open('../inventory.yml', 'r') as f:
+        with open(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), "inventory.yml"), 'r') as f:
             inventory = yaml.load(f)
 
             genres = set([g['genre'] for g in inventory])
@@ -102,7 +142,12 @@ if __name__ == '__main__':
                 session.add(game)
         session.commit()
 
-    for model in (Game, Level, Stars, Genre):
+
+
+    for model in (Game, Level, Stars, Genre, User):
         admin.add_view(ExportableModelView(model, db.session))
 
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    
+    admin.add_view(LibraryModelView(Library, db.session))
+
+    app.run(host='127.0.0.1', port=8080, debug=True)
