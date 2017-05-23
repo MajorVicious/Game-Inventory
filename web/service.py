@@ -1,5 +1,7 @@
+import math
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from sqlalchemy import create_engine
@@ -9,26 +11,30 @@ import yaml
 import os
 
 app = Flask(__name__)
+app.config['INVENTORY_FILE'] = os.path.abspath(
+    os.path.join(os.path.dirname(os.getcwd()), "inventory.yml"))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SECRET_KEY'] = 'CHANGEME'
 db = SQLAlchemy(app)
 admin = Admin(app, name='games', template_mode='bootstrap3', url='/')
+manager = Manager(app)
 
+user_library = db.Table(
+    'user_library', db.metadata,
+    db.Column('library_id', db.Integer, db.ForeignKey("library.id")),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')))
 
-user_library = db.Table('user_library', db.metadata,
-                    db.Column('library_id', db.Integer, db.ForeignKey("library.id")),
-                    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
-)
+game_library = db.Table(
+    'game_library', db.metadata,
+    db.Column('library_id', db.Integer, db.ForeignKey("library.id")),
+    db.Column('game_id', db.Integer, db.ForeignKey('game.id')))
 
-game_library = db.Table('game_library', db.metadata,
-                    db.Column('library_id', db.Integer, db.ForeignKey("library.id")),
-                    db.Column('game_id', db.Integer, db.ForeignKey('game.id'))
-)
 
 class ExportableModelView(ModelView):
     can_export = True
+
 
 class LibraryModelView(ModelView):
     column_list = ('name', 'games', 'users')
@@ -69,7 +75,6 @@ class Stars(db.Model):
         return '*' * self.amount
 
 
-
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -86,12 +91,42 @@ class Game(db.Model):
     level_id = db.Column(db.Integer, db.ForeignKey('level.id'))
     level = db.relationship(Level)
 
-    stars_id = db.Column(db.Integer, db.ForeignKey('stars.id'))
-    stars = db.relationship(Stars)
+    def features(self):
+        return {
+            'name': self.name,
+            'genre': self.genre_id,
+            'level': self.level_id,
+            # 'min_player': self.min_player,
+            # 'max_player': self.max_player,
+            'players': ((self.max_player + self.min_player) / 2),
+            'duration': self.duration
+        }
 
+    def __sub__(self, other):
+        a = self.features().copy()
+        b = other.features().copy()
+
+        del a['name']
+        del b['name']
+
+        inner_value = 0.
+
+        for col in a.keys():
+            inner_value += (a[col] - b[col])**2
+
+        return math.sqrt(inner_value)
+
+    def neighbors(self, others):
+        res = []
+        for other in others:
+            if other is self:
+                continue
+            res.append((other.name, self - other))
+        return sorted(res, key=lambda x: x[1])
 
     def __repr__(self):
         return self.name
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -99,7 +134,8 @@ class User(db.Model):
     libraries = db.relationship('Library', secondary=user_library)
 
     def __repr__(self):
-        return  self.name
+        return self.name
+
 
 class Library(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -111,8 +147,21 @@ class Library(db.Model):
         return self.name
 
 
+@manager.command
+def neighbors():
+    games = Game.query.all()
+    records = {}
+    for game in games:
+        records[game.name] = dict(game.neighbors(games))
+
+    import pandas as pd
+    df = pd.DataFrame(records)
+    from IPython import embed
+    embed()
+
 
 if __name__ == '__main__':
+    print(app.config['INVENTORY_FILE'])
     db.create_all()
     session = db.session
     if not session.query(Genre).count():
@@ -122,8 +171,7 @@ if __name__ == '__main__':
         ])
         session.add_all([Stars(1), Stars(2), Stars(3)])
 
-        with open(
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), "inventory.yml"), 'r') as f:
+        with open(app.config['INVENTORY_FILE'], 'r') as f:
             inventory = yaml.load(f)
 
             genres = set([g['genre'] for g in inventory])
@@ -142,12 +190,9 @@ if __name__ == '__main__':
                 session.add(game)
         session.commit()
 
-
-
     for model in (Game, Level, Stars, Genre, User):
         admin.add_view(ExportableModelView(model, db.session))
 
-    
     admin.add_view(LibraryModelView(Library, db.session))
 
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    manager.run()
