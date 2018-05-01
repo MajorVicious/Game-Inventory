@@ -9,6 +9,7 @@ from sqlalchemy import ForeignKey
 import datetime
 import yaml
 import os
+import random
 
 app = Flask(__name__)
 app.config['INVENTORY_FILE'] = os.path.abspath(
@@ -133,6 +134,8 @@ class User(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)
     libraries = db.relationship('Library', secondary=user_library)
 
+
+
     def __repr__(self):
         return self.name
 
@@ -142,6 +145,20 @@ class Library(db.Model):
     name = db.Column(db.String(80))
     games = db.relationship('Game', secondary=game_library)
     users = db.relationship('User', secondary=user_library)
+
+    def recommend(self):
+        others = Game.query.all()
+        best = []
+        res = []
+        for game in self.games:
+            for other in others:
+                if game is other:
+                    continue
+                res.append((other.name, game - other))
+            result = (sorted(res, key=lambda x: x[1]))
+            best.append(result[0])
+        print (result)
+        return "You would like {first}, {second}, {third}".format(first=best[random.randint(0,len(best))], second =best[random.randint(0, len(best))], third=best[random.randint(0, len(best))])
 
     def __repr__(self):
         return self.name
